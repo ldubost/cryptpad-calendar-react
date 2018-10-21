@@ -11,17 +11,26 @@ var frameUpdate = function(events) {
    window.calendar.setState({ events : events });
 }
 var frameRead = function(events) {
-   console.log("Frame read", window.calendar.state.events);
    return window.calendar.state.events;
+}
+
+var checkFrameCB = function() {
+   if (window.parent.setFrameCB) {
+     window.parent.setFrameCB(frameRead, frameUpdate);
+     if (window.parent.latestContent) {
+       frameUpdate(window.parent.latestContent);
+       window.parent.latestContent = null;
+     }
+   } else {
+     window.setTimeout(checkFrameCB, 1000);
+   }
 }
 
 class Selectable extends Component {
   constructor(...args) {
     super(...args)
 
-setTimeout(function(){ 
-    window.parent.setFrameCB(frameRead, frameUpdate);
-}, 3000);
+    checkFrameCB();
 
     var events = []
     if (window.parent.latestContent)
