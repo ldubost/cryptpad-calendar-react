@@ -7,18 +7,34 @@ BigCalendar.momentLocalizer(moment);
 
 const propTypes = {}
 
+var frameUpdate = function(events) {
+   window.calendar.setState({ events : events });
+}
+var frameRead = function(events) {
+   console.log("Frame read", window.calendar.state.events);
+   return window.calendar.state.events;
+}
+
 class Selectable extends Component {
   constructor(...args) {
     super(...args)
 
-    this.state = { events : []}
+setTimeout(function(){ 
+    window.parent.setFrameCB(frameRead, frameUpdate);
+}, 3000);
+
+    var events = []
+    if (window.parent.latestContent)
+     events = window.latestContent;
+    this.state = { events : events}
   }
+
 
   handleSelect = ({ start, end }) => {
     const title = window.prompt('New Event name')
-    console.log("State ", this.state.events);
-    console.log("Cryptpad frame", window.cryptpad);
-    if (title)
+    console.log("Cryptpad frame", window.parent.cryptpad);
+    window.parent.setFrameCB(frameRead, frameUpdate);
+    if (title) {
       this.setState({
         events: [
           ...this.state.events,
@@ -29,6 +45,8 @@ class Selectable extends Component {
           },
         ],
       })
+      window.parent.cryptpad.localChange();
+    }
   }
 
   render() {
