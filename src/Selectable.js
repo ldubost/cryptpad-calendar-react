@@ -15,7 +15,7 @@ var frameRead = function(events) {
 }
 
 var checkFrameCB = function() {
-   if (window.parent.setFrameCB) {
+   if (window.parent && window.parent.setFrameCB) {
      window.parent.setFrameCB(frameRead, frameUpdate);
      if (window.parent.latestContent) {
        frameUpdate(window.parent.latestContent);
@@ -33,16 +33,14 @@ class Selectable extends Component {
     checkFrameCB();
 
     var events = []
-    if (window.parent.latestContent)
-     events = window.latestContent;
     this.state = { events : events}
   }
 
 
   handleSelect = ({ start, end }) => {
     const title = window.prompt('New Event name')
-    console.log("Cryptpad frame", window.parent.cryptpad);
-    window.parent.setFrameCB(frameRead, frameUpdate);
+    if (window.parent && window.parent.setFrameCB)
+      window.parent.setFrameCB(frameRead, frameUpdate);
     if (title) {
       this.setState({
         events: [
@@ -54,7 +52,8 @@ class Selectable extends Component {
           },
         ],
       })
-      window.parent.cryptpad.localChange();
+      if (window.parent && window.parent.cryptpad)
+        window.parent.cryptpad.localChange();
     }
   }
 
